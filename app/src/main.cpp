@@ -2,7 +2,7 @@
 #include <memory>
 
 // 外部ライブラリ
-#include <glfw/glfw3.h>
+#include <GLFW/glfw3.h>
 #include <glad/glad.h>
 #include <entt/entt.hpp>
 #include <btBulletDynamicsCommon.h>

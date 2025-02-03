@@ -1,6 +1,5 @@
 #ifndef APP_INCLUDE_CAMERA_H_
 #define APP_INCLUDE_CAMERA_H_
-#define GLM_ENABLE_EXPERIMENTAL
 #include <glm/glm.hpp>
 #include <glm/gtx/quaternion.hpp>
 #include <glm/gtx/euler_angles.hpp>

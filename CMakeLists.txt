@@ -34,14 +34,25 @@ target_include_directories(${PROJECT_NAME} PUBLIC
 )
 
 # link libraries
-target_link_directories(${PROJECT_NAME} PUBLIC
-    ${CMAKE_SOURCE_DIR}/build/lib/${CONFIG}
-)
+if(WIN32)
+    target_link_directories(${PROJECT_NAME} PUBLIC
+        ${CMAKE_SOURCE_DIR}/build/lib/${CONFIG}
+    )
+
+    target_link_libraries(${PROJECT_NAME} PUBLIC
+        BulletDynamics_$<CONFIG>
+        BulletCollision_$<CONFIG>
+        LinearMath_$<CONFIG>
+    )
+else()
+    target_link_libraries(${PROJECT_NAME} PUBLIC
+        BulletDynamics
+        BulletCollision
+        LinearMath
+    )
+endif()
 
 target_link_libraries(${PROJECT_NAME} PUBLIC
-    BulletDynamics_$<CONFIG>
-    BulletCollision_$<CONFIG>
-    LinearMath_$<CONFIG>
     glfw
     EnTT
     glm
