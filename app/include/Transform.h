@@ -31,7 +31,7 @@ public:
     inline const glm::vec3 GetUp() const { return glm::normalize(m_Rotation * glm::vec3(0, 1, 0)); }
     inline const glm::mat4 GetTransformMatrix() const { return m_TransformMat; }
 private:
-    void culcTransform();
+    void calcTransform();
 
 private:
     glm::vec3 m_Position;

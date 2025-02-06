@@ -18,7 +18,7 @@ public:
 	static const glm::mat4 CulcViewMatrix(const glm::vec3& eye, const glm::vec3& target, const glm::vec3& up);
 
 protected:
-    virtual void culculate() = 0;
+    virtual void calculate() = 0;
 
 protected:
     glm::mat4 m_ProjectionMatrix;
@@ -32,7 +32,7 @@ public:
 	~OrthographicsCamera() = default;
 
 protected:
-	void culculate() override;
+	void calculate() override;
 
 private:
 	float m_Left;
@@ -49,7 +49,7 @@ public:
 	~PerspectiveCamera() = default;
 
 protected:
-	void culculate() override;
+	void calculate() override;
 
 private:
 	float m_Fovy;
