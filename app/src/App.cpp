@@ -12,32 +12,32 @@ void App::Run()
         glClearColor(0.5f, 0.3f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        // {// 物理演算更新
-        //     dynamicsWorld->stepSimulation(1.0f / 60.0f);
+        {// 物理演算更新
+            m_DynamicsWorld->stepSimulation(1.0f / 60.0f);
 
-        //     {// キューブリジッドボディ
-        //         btVector3 btPos = cubeRigidBody->getWorldTransform().getOrigin();
-        //         btQuaternion btRot = cubeRigidBody->getWorldTransform().getRotation();
+            {// キューブリジッドボディ
+                btVector3 btPos = m_CubeRigidBody->getWorldTransform().getOrigin();
+                btQuaternion btRot = m_CubeRigidBody->getWorldTransform().getRotation();
 
-        //         glm::vec3 pos = glm::vec3(btPos.x(), btPos.y(), btPos.z());
-        //         glm::quat rot = glm::quat(btRot.w(), btRot.x(), btRot.y(), btRot.z());
+                glm::vec3 pos = glm::vec3(btPos.x(), btPos.y(), btPos.z());
+                glm::quat rot = glm::quat(btRot.w(), btRot.x(), btRot.y(), btRot.z());
 
-        //         //printf("Position X: %f Y: %f Z: %f\n", pos.x, pos.y, pos.z);
-        //         //printf("Rotation X: %f Y: %f Z: %f W: %f\n", rot.x, rot.y, rot.z, rot.w);
-        //         Transform& transform = registry.get<Transform>(GameObject1);
-        //         transform.SetPosition(pos);
-        //         transform.SetRotation(rot);
-        //     }
-        // }
+                //printf("Position X: %f Y: %f Z: %f\n", pos.x, pos.y, pos.z);
+                //printf("Rotation X: %f Y: %f Z: %f W: %f\n", rot.x, rot.y, rot.z, rot.w);
+                Transform& transform = m_Registry.get<Transform>(m_GameObject1);
+                transform.SetPosition(pos);
+                transform.SetRotation(rot);
+            }
+        }
 
-        // {// 入力処理
-        //     if(glfwGetKey(m_Window, GLFW_KEY_SPACE) == GLFW_PRESS)
-        //     {
-        //         btVector3 impulse(0.0f, 1.0f, 0.0f);    // 力量
-        //         btVector3 rel_pos(0.0f, 0.0f, 0.0f);    // オブジェクトの中心からの相対座標
-        //         cubeRigidBody->applyImpulse(impulse, rel_pos);
-        //     }
-        // }
+        {// 入力処理
+            if(glfwGetKey(m_Window, GLFW_KEY_SPACE) == GLFW_PRESS)
+            {
+                btVector3 impulse(0.0f, 1.0f, 0.0f);    // 力量
+                btVector3 rel_pos(0.0f, 0.0f, 0.0f);    // オブジェクトの中心からの相対座標
+                m_CubeRigidBody->applyImpulse(impulse, rel_pos);
+            }
+        }
 
         
         {// レンダリング
@@ -132,27 +132,27 @@ void App::init()
         m_Registry.emplace<Shader>(m_GameObject1, SHADER_DIR "default.vert", SHADER_DIR "red.frag");
 
         // 物理演算に必要なクラス
-        // btVector3 scale(1.0f, 1.0f, 1.0f);
-        // cubeShape = new btBoxShape(scale);
+        btVector3 scale(1.0f, 1.0f, 1.0f);
+        m_CubeShape = new btBoxShape(scale);
 
-        // btVector3 pos(transform.GetPosition().x, transform.GetPosition().y, transform.GetPosition().z);
-        // btQuaternion rot(transform.GetQuaternion().w, transform.GetQuaternion().x, transform.GetQuaternion().y, transform.GetQuaternion().z);
-        // btTransform btTransform;
-        // btTransform.setIdentity();
-        // btTransform.setOrigin(pos);
-        // btTransform.setRotation(rot);
-        // printf("Rotation X: %f Y: %f Z: %f W: %f\n", rot.x(), rot.y(), rot.z(), rot.w());
+        btVector3 pos(transform.GetPosition().x, transform.GetPosition().y, transform.GetPosition().z);
+        btQuaternion rot(transform.GetQuaternion().w, transform.GetQuaternion().x, transform.GetQuaternion().y, transform.GetQuaternion().z);
+        btTransform btTransform;
+        btTransform.setIdentity();
+        btTransform.setOrigin(pos);
+        btTransform.setRotation(rot);
+        printf("Rotation X: %f Y: %f Z: %f W: %f\n", rot.x(), rot.y(), rot.z(), rot.w());
 
-        // float mass = 1.0f;
-        // btVector3 localInetia;
-        // cubeShape->calculateLocalInertia(mass, localInetia);
+        float mass = 1.0f;
+        btVector3 localInetia;
+        m_CubeShape->calculateLocalInertia(mass, localInetia);
 
-        // btDefaultMotionState* motion = new btDefaultMotionState(btTransform);
-        // btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, motion, cubeShape, localInetia);
-        // cubeRigidBody = new btRigidBody(rbInfo);
-        // cubeRigidBody->setFriction(1.0f);
+        btDefaultMotionState* motion = new btDefaultMotionState(btTransform);
+        btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, motion, m_CubeShape, localInetia);
+        m_CubeRigidBody = new btRigidBody(rbInfo);
+        m_CubeRigidBody->setFriction(1.0f);
 
-        // dynamicsWorld->addRigidBody(cubeRigidBody);
+        m_DynamicsWorld->addRigidBody(m_CubeRigidBody);
     }
 
     {// プレーンオブジェクト
@@ -165,27 +165,27 @@ void App::init()
         m_Registry.emplace<Shader>(m_GameObject2, SHADER_DIR "default.vert", SHADER_DIR "white.frag");
 
         // 物理演算に必要なクラス
-        // btVector3 scale(5.0f, 0.2f, 5.0f);
-        // planeShape = new btBoxShape(scale);
+        btVector3 scale(5.0f, 0.2f, 5.0f);
+        m_PlaneShape = new btBoxShape(scale);
 
-        // btVector3 pos(transform.GetPosition().x, transform.GetPosition().y, transform.GetPosition().z);
-        // btQuaternion rot(transform.GetQuaternion().w, transform.GetQuaternion().x, transform.GetQuaternion().y, transform.GetQuaternion().z);
-        // btTransform btTransform;
-        // btTransform.setIdentity();
-        // btTransform.setOrigin(pos);
-        // btTransform.setRotation(rot);
-        // printf("Rotation X: %f Y: %f Z: %f W: %f\n", rot.x(), rot.y(), rot.z(), rot.w());
+        btVector3 pos(transform.GetPosition().x, transform.GetPosition().y, transform.GetPosition().z);
+        btQuaternion rot(transform.GetQuaternion().w, transform.GetQuaternion().x, transform.GetQuaternion().y, transform.GetQuaternion().z);
+        btTransform btTransform;
+        btTransform.setIdentity();
+        btTransform.setOrigin(pos);
+        btTransform.setRotation(rot);
+        printf("Rotation X: %f Y: %f Z: %f W: %f\n", rot.x(), rot.y(), rot.z(), rot.w());
         
-        // float mass = 0.0f;
-        // btVector3 localInetia;
-        // planeShape->calculateLocalInertia(mass, localInetia);
+        float mass = 0.0f;
+        btVector3 localInetia;
+        m_PlaneShape->calculateLocalInertia(mass, localInetia);
 
-        // btDefaultMotionState* motion = new btDefaultMotionState(btTransform);
-        // btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, motion, planeShape, localInetia);
-        // planeRigidBody = new btRigidBody(rbInfo);
-        // planeRigidBody->setFriction(1.0f);
+        btDefaultMotionState* motion = new btDefaultMotionState(btTransform);
+        btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, motion, m_PlaneShape, localInetia);
+        m_PlaneRigidBody = new btRigidBody(rbInfo);
+        m_PlaneRigidBody->setFriction(1.0f);
 
-        // dynamicsWorld->addRigidBody(planeRigidBody);
+        m_DynamicsWorld->addRigidBody(m_PlaneRigidBody);
     }
 
     // ビューポート指定
@@ -201,6 +201,14 @@ void App::term()
     // GLFW 終了
     glfwDestroyWindow(m_Window);
     glfwTerminate();
+
+    delete m_PlaneRigidBody->getMotionState();
+    delete m_PlaneRigidBody;
+    delete m_PlaneShape;
+
+    delete m_CubeRigidBody->getMotionState();
+    delete m_CubeRigidBody;
+    delete m_CubeShape;
 
     delete m_DynamicsWorld;
     delete m_Solver;
