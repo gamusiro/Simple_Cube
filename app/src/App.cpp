@@ -13,30 +13,27 @@ void App::Run()
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         {// 物理演算更新
-            m_DynamicsWorld->stepSimulation(1.0f / 60.0f);
+            const float step = 1.0f / 60.0f;
+            Physics::update(step);
 
-            {// キューブリジッドボディ
-                btVector3 btPos = m_CubeRigidBody->getWorldTransform().getOrigin();
-                btQuaternion btRot = m_CubeRigidBody->getWorldTransform().getRotation();
+            auto view = m_Registry.view<Transform, RigidBody>();
+            for(auto entity : view)
+            {
+                Transform& transform = view.get<Transform>(entity);
+                RigidBody& rigidbody = view.get<RigidBody>(entity);
 
-                glm::vec3 pos = glm::vec3(btPos.x(), btPos.y(), btPos.z());
-                glm::quat rot = glm::quat(btRot.w(), btRot.x(), btRot.y(), btRot.z());
-
-                //printf("Position X: %f Y: %f Z: %f\n", pos.x, pos.y, pos.z);
-                //printf("Rotation X: %f Y: %f Z: %f W: %f\n", rot.x, rot.y, rot.z, rot.w);
-                Transform& transform = m_Registry.get<Transform>(m_GameObject1);
-                transform.SetPosition(pos);
-                transform.SetRotation(rot);
+                transform.SetPosition(ConvertVec3ToGLMFromBullet(rigidbody.GetPosition()));
+                transform.SetRotation(ConvertQuatToGLMFromBullet(rigidbody.GetRotaiton()));
             }
         }
 
         {// 入力処理
-            if(glfwGetKey(m_Window, GLFW_KEY_SPACE) == GLFW_PRESS)
-            {
-                btVector3 impulse(0.0f, 1.0f, 0.0f);    // 力量
-                btVector3 rel_pos(0.0f, 0.0f, 0.0f);    // オブジェクトの中心からの相対座標
-                m_CubeRigidBody->applyImpulse(impulse, rel_pos);
-            }
+            // if(glfwGetKey(m_Window, GLFW_KEY_SPACE) == GLFW_PRESS)
+            // {
+            //     btVector3 impulse(0.0f, 1.0f, 0.0f);    // 力量
+            //     btVector3 rel_pos(0.0f, 0.0f, 0.0f);    // オブジェクトの中心からの相対座標
+            //     m_CubeRigidBody->applyImpulse(impulse, rel_pos);
+            // }
         }
 
         
@@ -97,11 +94,7 @@ void App::init()
     const int height = 780;
     const float velocity = 10.0f;
 
-    m_CollisionConfiguration    = new btDefaultCollisionConfiguration();
-    m_CollisionDispatcher       = new btCollisionDispatcher(m_CollisionConfiguration);
-    m_OverlappingPairCache      = new btDbvtBroadphase();
-    m_Solver                    = new btSequentialImpulseConstraintSolver();
-    m_DynamicsWorld             = new btDiscreteDynamicsWorld(m_CollisionDispatcher, m_OverlappingPairCache, m_Solver, m_CollisionConfiguration);
+    Physics::init();
 
     // GLFW 初期化
     glfwInit();
@@ -131,28 +124,14 @@ void App::init()
         m_Registry.emplace<Cube>(m_GameObject1);
         m_Registry.emplace<Shader>(m_GameObject1, SHADER_DIR "default.vert", SHADER_DIR "red.frag");
 
-        // 物理演算に必要なクラス
-        btVector3 scale(1.0f, 1.0f, 1.0f);
-        m_CubeShape = new btBoxShape(scale);
-
-        btVector3 pos(transform.GetPosition().x, transform.GetPosition().y, transform.GetPosition().z);
-        btQuaternion rot(transform.GetQuaternion().w, transform.GetQuaternion().x, transform.GetQuaternion().y, transform.GetQuaternion().z);
-        btTransform btTransform;
-        btTransform.setIdentity();
-        btTransform.setOrigin(pos);
-        btTransform.setRotation(rot);
-        printf("Rotation X: %f Y: %f Z: %f W: %f\n", rot.x(), rot.y(), rot.z(), rot.w());
-
-        float mass = 1.0f;
-        btVector3 localInetia;
-        m_CubeShape->calculateLocalInertia(mass, localInetia);
-
-        btDefaultMotionState* motion = new btDefaultMotionState(btTransform);
-        btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, motion, m_CubeShape, localInetia);
-        m_CubeRigidBody = new btRigidBody(rbInfo);
-        m_CubeRigidBody->setFriction(1.0f);
-
-        m_DynamicsWorld->addRigidBody(m_CubeRigidBody);
+        ColliderParameter param;
+        param.transform.setOrigin(ConvertVec3ToBulletFromGLM(transform.GetPosition()));
+        param.transform.setRotation(ConvertQuatToBulletFromGLM(transform.GetQuaternion()));
+        param.scale = btVector3(1.0f, 1.0f, 1.0f);
+        param.friction = 1.0f;
+        param.mass = 1.0f;
+        BoxCollider& collider = m_Registry.emplace<BoxCollider>(m_GameObject1, param);
+        m_Registry.emplace<RigidBody>(m_GameObject1, collider);
     }
 
     {// プレーンオブジェクト
@@ -164,28 +143,13 @@ void App::init()
         m_Registry.emplace<Plane>(m_GameObject2);
         m_Registry.emplace<Shader>(m_GameObject2, SHADER_DIR "default.vert", SHADER_DIR "white.frag");
 
-        // 物理演算に必要なクラス
-        btVector3 scale(5.0f, 0.2f, 5.0f);
-        m_PlaneShape = new btBoxShape(scale);
-
-        btVector3 pos(transform.GetPosition().x, transform.GetPosition().y, transform.GetPosition().z);
-        btQuaternion rot(transform.GetQuaternion().w, transform.GetQuaternion().x, transform.GetQuaternion().y, transform.GetQuaternion().z);
-        btTransform btTransform;
-        btTransform.setIdentity();
-        btTransform.setOrigin(pos);
-        btTransform.setRotation(rot);
-        printf("Rotation X: %f Y: %f Z: %f W: %f\n", rot.x(), rot.y(), rot.z(), rot.w());
-        
-        float mass = 0.0f;
-        btVector3 localInetia;
-        m_PlaneShape->calculateLocalInertia(mass, localInetia);
-
-        btDefaultMotionState* motion = new btDefaultMotionState(btTransform);
-        btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, motion, m_PlaneShape, localInetia);
-        m_PlaneRigidBody = new btRigidBody(rbInfo);
-        m_PlaneRigidBody->setFriction(1.0f);
-
-        m_DynamicsWorld->addRigidBody(m_PlaneRigidBody);
+        ColliderParameter param;
+        param.transform.setOrigin(ConvertVec3ToBulletFromGLM(transform.GetPosition()));
+        param.transform.setRotation(ConvertQuatToBulletFromGLM(transform.GetQuaternion()));
+        param.scale = btVector3(5.0f, 0.02f, 5.0f);
+        param.friction = 1.0f;
+        param.mass = 0.0f;
+        BoxCollider& collider = m_Registry.emplace<BoxCollider>(m_GameObject2, param);
     }
 
     // ビューポート指定
@@ -202,17 +166,5 @@ void App::term()
     glfwDestroyWindow(m_Window);
     glfwTerminate();
 
-    delete m_PlaneRigidBody->getMotionState();
-    delete m_PlaneRigidBody;
-    delete m_PlaneShape;
-
-    delete m_CubeRigidBody->getMotionState();
-    delete m_CubeRigidBody;
-    delete m_CubeShape;
-
-    delete m_DynamicsWorld;
-    delete m_Solver;
-    delete m_OverlappingPairCache;
-    delete m_CollisionDispatcher;
-    delete m_CollisionConfiguration;
+    Physics::term();
 }

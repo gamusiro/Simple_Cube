@@ -15,38 +15,20 @@
 #include "Plane.h"
 #include "Shader.h"
 #include "Camera.h"
+#include "BoxCollider.h"
+
+// 物理演算
+#include "Physics.h"
+#include "Collider.h"
+
+// ユーティリティ
+#include "utils.h"
+
+
 
 
 #define ASSET_DIR "assets/"
 #define SHADER_DIR ASSET_DIR "shaders/"
-
-
-// class Collider : public Physics
-// {
-// protected:
-//     btCollisionShape* m_CollisionShape;
-//     btRigidBody* m_RigidBody;
-
-// private:
-//     friend class RigidBody;
-// };
-
-// class RigidBody
-// {
-// public:
-//     RigidBody(Collider& collider);
-//     ~RigidBody();
-
-//     void AddImpulese()
-//     {
-//         btVector3 impulse(0.0f, 1.0f, 0.0f);    // 力量
-//         btVector3 rel_pos(0.0f, 0.0f, 0.0f);    // オブジェクトの中心からの相対座標
-//         m_Collider.m_RigidBody->applyImpulse(impulse, rel_pos);
-//     }
-
-// private:
-//     Collider& m_Collider;
-// };
 
 
 class App
@@ -59,17 +41,11 @@ private:
     void term();
 
 private:
-    btCollisionConfiguration*               m_CollisionConfiguration;
-    btCollisionDispatcher*                  m_CollisionDispatcher;
-    btBroadphaseInterface*                  m_OverlappingPairCache;
-    btSequentialImpulseConstraintSolver*    m_Solver;
-    btDiscreteDynamicsWorld*                m_DynamicsWorld;
+    //btCollisionShape* m_CubeShape;
+    //btCollisionShape* m_PlaneShape;
 
-    btCollisionShape* m_CubeShape;
-    btCollisionShape* m_PlaneShape;
-
-    btRigidBody* m_CubeRigidBody;
-    btRigidBody* m_PlaneRigidBody;
+    //btRigidBody* m_CubeRigidBody;
+    //btRigidBody* m_PlaneRigidBody;
 
 
 
