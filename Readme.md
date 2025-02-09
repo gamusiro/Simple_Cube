@@ -10,4 +10,10 @@ git clone --recursive https://github.com/gamusiro/Simple_Cube.git
 Windows
 ```
 build.bat
+execute.bat
+```
+Linux
+```
+build.sh
+execute.sh
 ```
