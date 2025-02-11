@@ -12,73 +12,22 @@ void App::Run()
         glClearColor(0.5f, 0.3f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        {// 物理演算更新
-            const float step = 1.0f / 60.0f;
-            Physics::update(step);
+        // 物理演算更新
+        Physics::update(m_Registry);
 
-            auto view = m_Registry.view<Transform, RigidBody>();
-            for(auto entity : view)
-            {
-                Transform& transform = view.get<Transform>(entity);
-                RigidBody& rigidbody = view.get<RigidBody>(entity);
+        // {// 入力処理
+        //     RigidBody& rigidBody = m_Registry.get<RigidBody>(m_GameObject1);
+        //     if(glfwGetKey(m_Window, GLFW_KEY_SPACE) == GLFW_PRESS)
+        //     {
+        //         btVector3 impulse(0.0f, 1.0f, 0.0f);    // 力量
+        //         btVector3 rel_pos(0.0f, 0.0f, 0.0f);    // オブジェクトの中心からの相対座標
+        //         rigidBody.AddImpulse(impulse, rel_pos);
+        //     }
+        // }
 
-                transform.SetPosition(ConvertVec3ToGLMFromBullet(rigidbody.GetPosition()));
-                transform.SetRotation(ConvertQuatToGLMFromBullet(rigidbody.GetRotaiton()));
-            }
-        }
+        // 描画処理
+        m_MeshRenderer.Render(m_MainCamera, m_Registry);
 
-        {// 入力処理
-            // if(glfwGetKey(m_Window, GLFW_KEY_SPACE) == GLFW_PRESS)
-            // {
-            //     btVector3 impulse(0.0f, 1.0f, 0.0f);    // 力量
-            //     btVector3 rel_pos(0.0f, 0.0f, 0.0f);    // オブジェクトの中心からの相対座標
-            //     m_CubeRigidBody->applyImpulse(impulse, rel_pos);
-            // }
-        }
-
-        
-        {// レンダリング
-
-            // カメラ設定
-            PerspectiveCamera& cam = m_Registry.get<PerspectiveCamera>(m_MainCamera);
-            glm::vec3 eye = glm::vec3(0.0f, 10.0f, -15.0f);
-            glm::vec3 tar = glm::vec3(0.0f);
-            glm::vec3 up  = glm::vec3(0.0f, 1.0f, 0.0f);
-            glm::mat4 vp = cam.GetProjectionMatrix() * Camera::CulcViewMatrix(eye, tar, up);
-
-            {// レンダリング (Cube)
-                auto view = m_Registry.view<Transform, Cube, Shader>();
-                for(auto entity : view)
-                {
-                    Transform& transform = m_Registry.get<Transform>(entity);
-                    Cube& cube = m_Registry.get<Cube>(entity);
-                    Shader& shader = m_Registry.get<Shader>(entity);
-
-                    shader.Bind();
-                    shader.Set("u_Transform", transform.GetTransformMatrix());
-                    shader.Set("u_ViewProjection", vp);
-                    cube.Render();
-                    shader.Unbind();
-                }
-            }
-
-            {// レンダリング (Plane)
-                auto view = m_Registry.view<Transform, Plane, Shader>();
-                for(auto entity : view)
-                {
-                    Transform& transform = m_Registry.get<Transform>(entity);
-                    Plane& plane = m_Registry.get<Plane>(entity);
-                    Shader& shader = m_Registry.get<Shader>(entity);
-
-                    shader.Bind();
-                    shader.Set("u_Transform", transform.GetTransformMatrix());
-                    shader.Set("u_ViewProjection", vp);
-                    plane.Render();
-                    shader.Unbind();
-                }
-            }
-
-        }
         glfwSwapBuffers(m_Window);
         glfwPollEvents();
 

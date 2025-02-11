@@ -1,5 +1,9 @@
 #include "Physics.h"
 
+#include "Transform.h"
+#include "RigidBody.h"
+#include "utils.h"
+
 btCollisionConfiguration*               Physics::m_CollisionConfiguration;
 btCollisionDispatcher*                  Physics::m_CollisionDispatcher;
 btBroadphaseInterface*                  Physics::m_OverlappingPairCache;
@@ -15,9 +19,19 @@ void Physics::init()
     m_DynamicsWorld             = new btDiscreteDynamicsWorld(m_CollisionDispatcher, m_OverlappingPairCache, m_Solver, m_CollisionConfiguration);
 }
 
-void Physics::update(float step)
+void Physics::update(entt::registry& registry)
 {
-    m_DynamicsWorld->stepSimulation(step);
+    m_DynamicsWorld->stepSimulation(k_DELTA_STEP);
+
+    auto view = registry.view<Transform, RigidBody>();
+    for(auto entity : view)
+    {
+        Transform& transform = view.get<Transform>(entity);
+        RigidBody& rigidbody = view.get<RigidBody>(entity);
+
+        transform.SetPosition(ConvertVec3ToGLMFromBullet(rigidbody.GetPosition()));
+        transform.SetRotation(ConvertQuatToGLMFromBullet(rigidbody.GetRotaiton()));
+    }
 }
 
 void Physics::term()

@@ -25,17 +25,4 @@ private:
     friend class RigidBody;
 };
 
-class RigidBody
-{
-public:
-    RigidBody(Collider& collider) : m_RigidBody(*collider.m_RigidBody){}
-    ~RigidBody() = default;
-
-    inline btVector3 GetPosition() const { return m_RigidBody.getWorldTransform().getOrigin(); }
-    inline btQuaternion GetRotaiton() const { return m_RigidBody.getWorldTransform().getRotation(); }
-
-private:
-    btRigidBody& m_RigidBody;
-};
-
 #endif

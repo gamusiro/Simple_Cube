@@ -16,6 +16,7 @@
 #include "Shader.h"
 #include "Camera.h"
 #include "BoxCollider.h"
+#include "RigidBody.h"
 
 // 物理演算
 #include "Physics.h"
@@ -23,6 +24,9 @@
 
 // ユーティリティ
 #include "utils.h"
+
+// システム
+#include "MeshRenderer.h"
 
 
 
@@ -41,19 +45,13 @@ private:
     void term();
 
 private:
-    //btCollisionShape* m_CubeShape;
-    //btCollisionShape* m_PlaneShape;
-
-    //btRigidBody* m_CubeRigidBody;
-    //btRigidBody* m_PlaneRigidBody;
-
-
-
     GLFWwindow* m_Window;
     entt::registry m_Registry;
     entt::entity m_MainCamera;
     entt::entity m_GameObject1;   // ゲームオブジェクト(Cube)
     entt::entity m_GameObject2;   // ゲームオブジェクト(Plane)
+
+    MeshRender m_MeshRenderer;
 
     float m_LastTime;
 };
