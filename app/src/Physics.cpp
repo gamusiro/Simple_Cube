@@ -17,6 +17,8 @@ void Physics::init()
     m_OverlappingPairCache      = new btDbvtBroadphase();
     m_Solver                    = new btSequentialImpulseConstraintSolver();
     m_DynamicsWorld             = new btDiscreteDynamicsWorld(m_CollisionDispatcher, m_OverlappingPairCache, m_Solver, m_CollisionConfiguration);
+
+    m_DynamicsWorld->setGravity(btVector3(0.0f, -9.81f, 0.0f));
 }
 
 void Physics::update(entt::registry& registry)

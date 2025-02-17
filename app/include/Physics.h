@@ -21,6 +21,7 @@ protected:
 
 private:
     constexpr static btScalar k_DELTA_STEP = 1.0f / 60.0f;
+    friend class Scene;
     friend class App;
 };
 

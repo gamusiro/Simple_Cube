@@ -28,11 +28,10 @@
 // システム
 #include "MeshRenderer.h"
 
+// シーン
+#include "Scene.h"
+#include "TesterScene.h"
 
-
-
-#define ASSET_DIR "assets/"
-#define SHADER_DIR ASSET_DIR "shaders/"
 
 
 class App
@@ -46,12 +45,7 @@ private:
 
 private:
     GLFWwindow* m_Window;
-    entt::registry m_Registry;
-    entt::entity m_MainCamera;
-    entt::entity m_GameObject1;   // ゲームオブジェクト(Cube)
-    entt::entity m_GameObject2;   // ゲームオブジェクト(Plane)
-
-    MeshRender m_MeshRenderer;
+    std::unique_ptr<Scene> m_Scene;
 
     float m_LastTime;
 };

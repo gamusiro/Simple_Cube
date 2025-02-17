@@ -10,7 +10,7 @@ BoxCollider::BoxCollider()
 
     float mass = 0.0f;
     float friction = 1.0f;
-    btVector3 localInetia;
+    btVector3 localInetia(0.0f, 0.0f, 0.0f);
     m_CollisionShape->calculateLocalInertia(mass, localInetia);
 
     btDefaultMotionState* motion = new btDefaultMotionState(btTransform);
